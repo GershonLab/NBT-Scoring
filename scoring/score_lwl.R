@@ -29,6 +29,9 @@ score_lwl<-function(data,age){
                shovel_window_g3=NA_real_, truck_hand_g2=NA_real_, bucket_deer_g4=NA_real_, sneaker_tricycle_g5=NA_real_, 
                necklace_shovel_g3=NA_real_, sock_door_g1=NA_real_, bucket_muffin_g4=NA_real_)
   
+  # all NON-EXPERIMENTAL items 
+  lwl_nonexp_items<-lwl_younger_ipar$ItemID[c(1:30)]
+  
   # clean input data for scoring
   clean_data=data%>%
     clean_names()%>%
@@ -42,14 +45,17 @@ score_lwl<-function(data,age){
     mutate(sum_correct=sum(.))%>%
     pull(sum_correct)
   
-  # pull # items completed
-  items_completed=length(clean_data)
+  # pull # *non-experimental* items completed
+  items_completed=clean_data%>%
+    dplyr::select(any_of(lwl_nonexp_items))%>%
+    dplyr::select_if(~sum(!is.na(.))>0)%>%
+    length(.)
   
   # add items not completed as NA
   clean_data=clean_data%>%
     add_column(!!!lwl_cols[!names(lwl_cols) %in% names(.)])
   
-  # scoring routine starts here
+  # scoring routine starts here - at least 6 non-experimental items must be completed for a score
   if(items_completed>=6){
     if(age<15){
       out<-myMAP(dat=clean_data,par=lwl_younger_ipar)
