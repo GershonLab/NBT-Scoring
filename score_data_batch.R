@@ -2,7 +2,10 @@
 #### NIH Baby Toolbox scoring script ####
 # this script scores the following tests: Mullen Receptive (En and Sp), 
 # Mullen Expressive (En and Sp), Executive Function (Familiarization) (En and Sp), 
-# and Looking While Listening (En and Sp).
+# Looking While Listening (En and Sp), and Mullen Visual Reception (En and Sp). 
+# Newly added measures include:
+# Memory Task Learning and Test, Visual Delayed Response, Who Has More, Subitizing,
+# Verbal Arithmetic, Counting
 #
 # Note: those that complete MR and ME get a Language composite.
 # No scores are provided for NCD and SCD
@@ -153,7 +156,7 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
       if('Looking While Listening' %in% item_export$InstrumentTitle){
         lwl_data<-item_export%>%
           filter(InstrumentTitle=='Looking While Listening')%>%
-          subset(Key=='Score')%>%
+          subset(Key=='Score'&PID==pid)%>%
           pivot_wider(names_from=ItemID,values_from=Value)
         
         items_completed=lwl_data%>%
@@ -180,7 +183,7 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
         
         lwl_data<-item_export%>%
           filter(InstrumentTitle=='Looking While Listening (Spanish)')%>%
-          subset(Key=='Score')%>%
+          subset(Key=='Score'&PID==pid)%>%
           pivot_wider(names_from=ItemID,values_from=Value)
         
         lwl_scored<-score_lwl_sp(lwl_data)
@@ -199,7 +202,7 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
       if('Mullen Receptive' %in% item_export$InstrumentTitle || 'Mullen Receptive (Spanish)' %in% item_export$InstrumentTitle){
         mr_data<-item_export%>%
           filter(InstrumentTitle=='Mullen Receptive'|InstrumentTitle=='Mullen Receptive (Spanish)')%>%
-          subset(Key=='Score')%>%
+          subset(Key=='Score'&PID==pid)%>%
           pivot_wider(names_from=ItemID,values_from=Value)
         
         items_completed=mr_data%>%
@@ -238,7 +241,7 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
           filter(InstrumentTitle=='Mullen Expressive Observational'|InstrumentTitle=='Mullen Expressive Prompted'|
                    InstrumentTitle=='Mullen Expressive Observational (Spanish)'|InstrumentTitle=='Mullen Expressive Prompted (Spanish)')%>%
           dplyr::select(-c('InstrumentID','InstrumentTitle'))%>%
-          subset(Key=='Score')%>%
+          subset(Key=='Score'&PID==pid)%>%
           pivot_wider(names_from=ItemID,values_from=Value)
         
         items_completed=me_data%>%
@@ -273,7 +276,7 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
         mvr_data<-item_export%>%
           filter(InstrumentTitle=='Mullen Visual Reception'|InstrumentTitle=='Mullen Visual Reception (Spanish)')%>%
           dplyr::select(-c('InstrumentID','InstrumentTitle'))%>%
-          subset(Key=='Score')%>%
+          subset(Key=='Score'&PID==pid)%>%
           pivot_wider(names_from=ItemID,values_from=Value)
         
         items_completed=mvr_data%>%
@@ -309,7 +312,7 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
         ef_data<-item_export%>%
           filter(InstrumentTitle=='Executive Function'|InstrumentTitle=='Executive Function (Spanish)')%>%
           dplyr::select(-c('InstrumentID','InstrumentTitle'))%>%
-          subset(Key=='Score')%>%
+          subset(Key=='Score'&PID==pid)%>%
           pivot_wider(names_from=ItemID,values_from=Value)
         
         calibrated<-check_calibration(ef_data)
@@ -404,7 +407,7 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
         mtl_data<-item_export%>%
           filter(InstrumentTitle=='Memory Task Learning'|InstrumentTitle=='Memory Task Learning (Spanish)')%>%
           dplyr::select(-c('InstrumentID','InstrumentTitle'))%>%
-          subset(Key=='Score')%>%
+          subset(Key=='Score'&PID==pid)%>%
           pivot_wider(names_from=ItemID,values_from=Value)
         
         items_completed=mtl_data%>%
@@ -438,7 +441,7 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
         mtt_data<-item_export%>%
           filter(InstrumentTitle=='Memory Task Test'|InstrumentTitle=='Memory Task Test (Spanish)')%>%
           dplyr::select(-c('InstrumentID','InstrumentTitle'))%>%
-          subset(Key=='Score')%>%
+          subset(Key=='Score'&PID==pid)%>%
           pivot_wider(names_from=ItemID,values_from=Value)
         
         items_completed=mtt_data%>%
@@ -472,7 +475,7 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
         vdr_data<-item_export%>%
           filter(InstrumentTitle=='Visual Delayed Response'|InstrumentTitle=='Visual Delayed Response (Spanish)')%>%
           dplyr::select(-c('InstrumentID','InstrumentTitle'))%>%
-          subset(Key=='Score')%>%
+          subset(Key=='Score'&PID==pid)%>%
           pivot_wider(names_from=ItemID,values_from=Value)
         
         items_completed=vdr_data%>%
@@ -506,7 +509,7 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
         whm_data<-item_export%>%
           filter(InstrumentTitle=='Who Has More'|InstrumentTitle=='Who Has More (Spanish)')%>%
           dplyr::select(-c('InstrumentID','InstrumentTitle'))%>%
-          subset(Key=='Score')%>%
+          subset(Key=='Score'&PID==pid)%>%
           pivot_wider(names_from=ItemID,values_from=Value)
         
         items_completed=whm_data%>%
@@ -540,7 +543,7 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
         sub_data<-item_export%>%
           filter(InstrumentTitle=='Subitizing'|InstrumentTitle=='Subitizing (Spanish)')%>%
           dplyr::select(-c('InstrumentID','InstrumentTitle'))%>%
-          subset(Key=='Score')%>%
+          subset(Key=='Score'&PID==pid)%>%
           pivot_wider(names_from=ItemID,values_from=Value)
         
         items_completed=sub_data%>%
@@ -574,7 +577,7 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
         va_data<-item_export%>%
           filter(InstrumentTitle=='Verbal Arithmetic'|InstrumentTitle=='Verbal Arithmetic (Spanish)')%>%
           dplyr::select(-c('InstrumentID','InstrumentTitle'))%>%
-          subset(Key=='Score')%>%
+          subset(Key=='Score'&PID==pid)%>%
           pivot_wider(names_from=ItemID,values_from=Value)
         
         items_completed=va_data%>%
@@ -612,7 +615,7 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
         counting_data<-item_export%>%
           filter(str_detect(InstrumentTitle,'Counting'))%>%
           dplyr::select(-c('InstrumentID','InstrumentTitle'))%>%
-          subset(Key=='Score')%>%
+          subset(Key=='Score'&PID==pid)%>%
           pivot_wider(names_from=ItemID,values_from=Value)
         
         items_completed=counting_data%>%
