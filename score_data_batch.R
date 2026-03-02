@@ -22,6 +22,9 @@
 # install.packages(nlme,dep=T)
 # install.packages(jsonlite,dep=T)
 # install.packages(purrr,dep=T)
+# install.packages(devTools,dep=T)
+# devtools::install_github('GershonLab/mtbfx')
+
 library(psych)
 library(janitor)
 library(tidyverse)
@@ -31,6 +34,7 @@ library(mnormt)
 library(nlme)
 library(jsonlite)
 library(purrr)
+library(MTBfx)
 
 # set directory - if this doesn't work, click Session >> Set Working Directory >> To Source File Location
 setwd(getwd()) 
@@ -50,6 +54,9 @@ source('scoring/score_subitizing.R')
 source('scoring/score_va.R')
 source('scoring/score_counting.R')
 source('scoring/score_lang_norms.R')
+source('scoring/score_efmem_norms.R')
+source('scoring/score_math_norms.R')
+source('scoring/score_cog_norms.R')
 source('scoring/check_calibration.R')
 
 ###############################################################################
@@ -69,7 +76,7 @@ json_export_files<-list.files(json_export_path,pattern='AssessmentGazeData') # d
 
 all_output<-data.frame()
 for(i in 1:length(item_export_files)){ # uncomment this to run through batch files
-# for(i in 1:1){ # uncomment for testing
+# for(i in 1:1){ # uncomment for testing or to specify a file
   file_name=item_export_files[i]
   print(i)
   
@@ -259,9 +266,11 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
                    CSS_SE=analyticSE1*9.1024,
                    pid=pid,
                    age=age)
+          print('Successfully scored ME')
           
           if(is.na(me_scored$mirtTheta_1)){
             me_scored<-NULL
+            print('no ME score')
           }
         }
         
@@ -644,7 +653,8 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
       }
       
       #### score Language composite + get norms ####
-      if(!is.null(mr_scored)&&!is.null(me_scored)){
+      if(!is.null(mr_scored)&&!is.null(me_scored)&&
+         age>=1&&age<=42){
         lang_norms=score_lang_norms(mr_css=mr_scored$CSS,
                                     me_css=me_scored$CSS,
                                     mr_css_se=mr_scored$CSS_SE,
@@ -652,7 +662,8 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
                                     age=age)%>%
           mutate(pid=pid,
                  age=age)
-      }else if(!is.null(mr_scored)&&is.null(me_scored)){
+      }else if(!is.null(mr_scored)&&is.null(me_scored)&&
+               age>=1&&age<=42){
         lang_norms=score_lang_norms(mr_css=mr_scored$CSS,
                                     me_css=NA,
                                     mr_css_se=mr_scored$CSS_SE,
@@ -660,7 +671,8 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
                                     age=age)%>%
           mutate(pid=pid,
                  age=age)
-      }else if(is.null(mr_scored)&&!is.null(me_scored)){
+      }else if(is.null(mr_scored)&&!is.null(me_scored)&&
+               age>=1&&age<=42){
         lang_norms=score_lang_norms(mr_css=NA,
                                     me_css=me_scored$CSS,
                                     mr_css_se=NA,
@@ -672,8 +684,71 @@ for(i in 1:length(item_export_files)){ # uncomment this to run through batch fil
         lang_norms=NULL
       }
       
+      #### score EFMem composite + get norms ####
+      if(!is.null(mtl_scored)&&!is.null(mtt_scored)&&!is.null(vdr_scored)&&
+         age>=22&&age<=42){
+        efmem_norms=score_efmem_norms(mtl_css=mtl_scored$CSS,
+                                      mtt_css=mtt_scored$CSS,
+                                      vdr_css=vdr_scored$CSS,
+                                      mtl_css_se=mtl_scored$CSS_SE,
+                                      mtt_css_se=mtt_scored$CSS_SE,
+                                      vdr_css_se=vdr_scored$CSS_SE,
+                                      age=age)%>%
+          mutate(pid=pid,
+                 age=age)
+      }else{
+        efmem_norms=NULL
+      }
+      
+      #### score Math composite + get norms ####
+      if(!is.null(whm_scored)&&!is.null(sub_scored)&&!is.null(counting_scored)&&
+         age>=25&&age<=42){
+        math_norms=score_math_norms(whm_css=whm_scored$CSS,
+                                      sub_css=sub_scored$CSS,
+                                      counting_css=counting_scored$CSS,
+                                      whm_css_se=whm_scored$CSS_SE,
+                                      sub_css_se=sub_scored$CSS_SE,
+                                      counting_css_se=counting_scored$CSS_SE,
+                                      age=age)%>%
+          mutate(pid=pid,
+                 age=age)
+      }else{
+        math_norms=NULL
+      }
+      
+      #### score Cognition composite + get norms ####
+      if(!is.null(mr_scored)&&!is.null(me_scored)&&
+         !is.null(mtl_scored)&&!is.null(mtt_scored)&&!is.null(vdr_scored)&&
+         !is.null(whm_scored)&&!is.null(sub_scored)&&!is.null(counting_scored)&&
+         age>=25&&age<=42){
+        cog_norms=score_cog_norms(mr_css=mr_scored$CSS,
+                                  me_css=me_scored$CSS,
+                                  mr_css_se=mr_scored$CSS_SE,
+                                  me_css_se=me_scored$CSS_SE,
+                                  mtl_css=mtl_scored$CSS,
+                                  mtt_css=mtt_scored$CSS,
+                                  vdr_css=vdr_scored$CSS,
+                                  mtl_css_se=mtl_scored$CSS_SE,
+                                  mtt_css_se=mtt_scored$CSS_SE,
+                                  vdr_css_se=vdr_scored$CSS_SE,
+                                  whm_css=whm_scored$CSS,
+                                  sub_css=sub_scored$CSS,
+                                  counting_css=counting_scored$CSS,
+                                  whm_css_se=whm_scored$CSS_SE,
+                                  sub_css_se=sub_scored$CSS_SE,
+                                  counting_css_se=counting_scored$CSS_SE,
+                                  age=age)%>%
+          mutate(pid=pid,
+                 age=age)
+      }else{
+        cog_norms=NULL
+      }
+      
       #### output scored data into a table #####
       output<-data.frame(lang_norms)%>%
+        dplyr::bind_rows(efmem_norms)%>%
+        dplyr::bind_rows(math_norms)%>%
+        dplyr::bind_rows(cog_norms)%>%
         dplyr::bind_rows(mvr_scored)%>%
         dplyr::bind_rows(lwl_scored)%>%
         dplyr::bind_rows(ef_scored)%>%
